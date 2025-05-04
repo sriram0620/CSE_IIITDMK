@@ -35,37 +35,7 @@ export default function HeroSection() {
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <StatsCard
-            icon={<BookOpen className="h-8 w-8 text-blue-500" />}
-            title="Journal Articles"
-            value="250+"
-            description="Peer-reviewed publications in top journals"
-          />
-          <StatsCard
-            icon={<Users className="h-8 w-8 text-green-500" />}
-            title="Conference Papers"
-            value="420+"
-            description="Presentations at international conferences"
-          />
-          <StatsCard
-            icon={<Award className="h-8 w-8 text-purple-500" />}
-            title="Citations"
-            value="15,000+"
-            description="Impact across the research community"
-          />
-          <StatsCard
-            icon={<FileText className="h-8 w-8 text-orange-500" />}
-            title="Research Areas"
-            value="25+"
-            description="Diverse domains of expertise"
-          />
-        </motion.div>
+        
       </div>
     </section>
   )

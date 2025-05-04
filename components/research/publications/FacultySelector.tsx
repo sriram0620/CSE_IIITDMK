@@ -89,6 +89,7 @@ export default function FacultySelector({ facultyData, selectedFaculty, onSelect
                     width={32}
                     height={32}
                     className="rounded-full"
+                    fallbackSrc="/placeholder.svg"
                   />
                 </div>
                 <div className="overflow-hidden">

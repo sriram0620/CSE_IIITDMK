@@ -31,6 +31,54 @@ interface FacultyMember {
   email?: string
 }
 
+// Helper function to determine publication type
+function determinePublicationType(citation: string, venue: string): string {
+  const lowerCitation = citation.toLowerCase();
+  const lowerVenue = venue.toLowerCase();
+  
+  // Check for book indicators
+  if (
+    lowerCitation.includes("book") || 
+    lowerCitation.includes("publisher") || 
+    lowerCitation.includes("press") || 
+    lowerCitation.includes("edition") ||
+    lowerCitation.includes("isbn") ||
+    /published by|publishing/.test(lowerCitation)
+  ) {
+    // Determine if it's a chapter or a whole book
+    if (lowerCitation.includes("chapter") || lowerCitation.includes("in:")) {
+      return "chapter";
+    }
+    return "book";
+  }
+  
+  // Check for journal
+  if (
+    lowerVenue.includes("journal") || 
+    lowerVenue.includes("transactions") || 
+    lowerVenue.includes("review") ||
+    lowerVenue.includes("letters") ||
+    /vol(\.|ume)/.test(lowerVenue)
+  ) {
+    return "journal";
+  }
+  
+  // Check for conference
+  if (
+    lowerVenue.includes("conference") || 
+    lowerVenue.includes("proceedings") || 
+    lowerVenue.includes("symposium") ||
+    lowerVenue.includes("workshop") ||
+    lowerCitation.includes("conference") ||
+    lowerCitation.includes("proceedings")
+  ) {
+    return "conference";
+  }
+  
+  // Default to conference as fallback
+  return "conference";
+}
+
 // Helper function to split any kind of line breaks (reused from FacultyDetail.tsx)
 const splitLines = (text: string): string[] => {
   if (!text) return [];
@@ -45,6 +93,7 @@ function parsePublicationCitation(citation: string): {
   journal?: string;
   year?: string;
   doi?: string;
+  pubType?: string;
 } {
   const result: {
     authors?: string;
@@ -52,6 +101,7 @@ function parsePublicationCitation(citation: string): {
     journal?: string;
     year?: string;
     doi?: string;
+    pubType?: string;
   } = {};
   
   // Extract DOI if present
@@ -66,19 +116,114 @@ function parsePublicationCitation(citation: string): {
     result.year = yearMatch[1];
   }
   
-  // Try to extract authors (often before the first period, or before title)
-  const authorsMatch = citation.match(/^(.+?)\./) || citation.match(/^(.+?),/);
-  if (authorsMatch) {
-    result.authors = authorsMatch[1].trim();
+  // Enhanced author extraction for books and publications
+  // Try multiple patterns for author extraction in this order of priority
+  
+  // Try to extract authors with pattern "Author1, Author2, and Author3" or "Author1, Author2, Author3,"
+  const multipleAuthorsMatch = citation.match(/^([^\.]+(?:,\s+(?:and\s+)?[^\.]+)+)[\.,]/i);
+  if (multipleAuthorsMatch) {
+    result.authors = multipleAuthorsMatch[1].trim();
+  } 
+  // Books often have pattern "Author1, Author2, Author3 (year)" or "Author1, Author2, Author3. Title"
+  else if (citation.includes('(') && citation.indexOf('(') > 10) {
+    const authorsPart = citation.substring(0, citation.indexOf('(')).trim();
+    if (authorsPart.includes(',')) {
+      result.authors = authorsPart.endsWith(',') ? authorsPart.slice(0, -1) : authorsPart;
+    }
+  }
+  // If citation starts with names and then has a year
+  else if (yearMatch && yearMatch.index && yearMatch.index > 10) {
+    const beforeYear = citation.substring(0, yearMatch.index).trim();
+    if (beforeYear.includes(',')) {
+      const lastComma = beforeYear.lastIndexOf(',');
+      result.authors = beforeYear.substring(0, lastComma).trim();
+    }
+  }
+  // Fallback to traditional pattern (authors before first period or comma)
+  else {
+    const authorsMatch = citation.match(/^(.+?)\./) || citation.match(/^(.+?),/);
+    if (authorsMatch) {
+      result.authors = authorsMatch[1].trim();
+    }
+  }
+  
+  // Clean up authors string: remove trailing periods, "and" at the end
+  if (result.authors) {
+    result.authors = result.authors.replace(/\s+and\s*$/, '').replace(/\.$/, '').trim();
+    
+    // If we have a long string without commas, it might not be authors
+    if (result.authors.length > 100 && !result.authors.includes(',')) {
+      result.authors = undefined;
+    }
+  }
+  
+  // Look for ISBN (indicates a book)
+  if (citation.toLowerCase().includes('isbn')) {
+    result.pubType = 'book';
+  }
+  
+  // Look for publisher indicators
+  const publisherMatch = citation.match(/published by (.+?)[,\.]/i) || 
+                         citation.match(/(.+?) press/i) || 
+                         citation.match(/(.+?) publisher/i);
+  if (publisherMatch) {
+    result.journal = publisherMatch[1].trim();
+    // Default to book if we find a publisher
+    if (!result.pubType) {
+      result.pubType = 'book';
+    }
+  }
+  
+  // Look for "in:" which often indicates a book chapter
+  if (citation.toLowerCase().match(/in:\s+(.+?)[\.,]/i) || citation.toLowerCase().includes('chapter')) {
+    result.pubType = 'chapter';
   }
   
   // Try to extract journal/venue (often in italics or between quotes)
   const journalMatch = citation.match(/[\.,]\s*["'](.+?)["']/) || citation.match(/in\s+(.+?),/i);
-  if (journalMatch) {
+  if (journalMatch && !result.journal) {
     result.journal = journalMatch[1].trim();
   }
   
+  // For books, try to extract title after the authors and before the publisher
+  if ((result.pubType === 'book' || result.pubType === 'chapter') && result.authors) {
+    const afterAuthors = citation.substring(citation.indexOf(result.authors) + result.authors.length);
+    const titleMatch = afterAuthors.match(/[,\.]\s*["'](.+?)["']/) || afterAuthors.match(/[,\.]\s*(.+?)[,\.]/);
+    if (titleMatch) {
+      result.title = titleMatch[1].trim();
+    }
+  }
+  
   return result;
+}
+
+// Helper function to process authors for better display
+function processAuthors(authorsString: string | undefined): string {
+  if (!authorsString) return 'Unknown';
+  
+  // Clean up the authors string
+  let cleanedAuthors = authorsString
+    .replace(/\s+et\s+al\.?/i, ' et al.') // standardize "et al"
+    .replace(/\band\b/g, ',') // replace "and" with commas for consistent splitting
+    .replace(/\s+,\s+/g, ', ') // standardize spacing around commas
+    .replace(/\s{2,}/g, ' ') // remove extra spaces
+    .replace(/,+/g, ',') // remove duplicate commas
+    .trim();
+  
+  // Split by commas to get individual authors
+  let authors = cleanedAuthors.split(',').map(a => a.trim()).filter(a => a.length > 0);
+  
+  // Format author list properly
+  if (authors.length === 0) {
+    return 'Unknown';
+  } else if (authors.length === 1) {
+    return authors[0];
+  } else if (authors.length === 2) {
+    return `${authors[0]} and ${authors[1]}`;
+  } else {
+    const lastAuthor = authors.pop();
+    return `${authors.join(', ')} and ${lastAuthor}`;
+  }
 }
 
 // Fallback component for when data is loading
@@ -113,8 +258,6 @@ export default function PublicationsPage() {
   // UI state
   const [selectedFaculty, setSelectedFaculty] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [yearFilter, setYearFilter] = useState<number | null>(null)
-  const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -145,6 +288,8 @@ export default function PublicationsPage() {
           data.faculty.map(async (faculty: any, index: number) => {
             // Only proceed with email-based fetching if we have an email
             let publications: Publication[] = [];
+            // Use a global ID counter for publications to ensure uniqueness
+            let pubIdCounter = 0;
 
             if (faculty.email) {
               try {
@@ -162,35 +307,75 @@ export default function PublicationsPage() {
 
                   // Process publications if we have detailed data
                   if (facultyInfo) {
+                    console.log("Processing faculty publications for:", faculty.nickname);
+                    
+                    // Print out facultyInfo keys to see if any book-related fields exist
+                    console.log("Available faculty fields:", Object.keys(facultyInfo));
+                    
                     // Extract publications from pubCite3 and pubCite4 fields
                     if (facultyInfo.pubCite3) {
                       const pubList = splitLines(facultyInfo.pubCite3);
-                      pubList.forEach((pub: string, idx: number) => {
+                      console.log(`Found ${pubList.length} publications in pubCite3`);
+                      
+                      pubList.forEach((pub: string) => {
                         const parts = parsePublicationCitation(pub);
+                        const venue = parts.journal || 'Unknown Journal/Conference';
+                        const pubType = parts.pubType || determinePublicationType(pub, venue);
+                        
+                        // Debug publication type detection
+                        if (pubType === 'book' || pubType === 'chapter') {
+                          console.log("Found book/chapter in pubCite3:", pubType, pub.substring(0, 80) + "...");
+                        }
                         
                         publications.push({
+<<<<<<< HEAD
                           id: idx,
                           title: parts.title || pub.trim()
                           // authors: parts.authors || 'Unknown',
+=======
+                          id: pubIdCounter++,
+                          title: parts.title || pub.trim(),
+
+                          authors: processAuthors(parts.authors),
+                         
+                         
+>>>>>>> 90624c3016edfa3bdec4bc81d7e8afe71c1e64cf
                           // venue: parts.journal || 'Unknown Journal/Conference',
                           // year: parts.year ? parseInt(parts.year) : 2023,
                           // type: (parts.journal || '').toLowerCase().includes('journal') ? 'journal' : 'conference',
                           // doi: parts.doi || '',
                           // citations: Math.floor(Math.random() * 10), // Still random as citation data isn't available
+<<<<<<< HEAD
                           // abstract: 'Abstract not available',
                           // keywords: facultyInfo.schoolName1 
                           //   ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean)
                           //   : ['Computer Science']
+=======
+                          // abstract: 'Abstract not availab
+                          keywords: facultyInfo.schoolName1 
+                            ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean)
+                            : ['Computer Science']
+>>>>>>> 90624c3016edfa3bdec4bc81d7e8afe71c1e64cf
                         });
                       });
                     }
                     
                     if (facultyInfo.pubCite4) {
                       const pubList = splitLines(facultyInfo.pubCite4);
-                      pubList.forEach((pub: string, idx: number) => {
+                      console.log(`Found ${pubList.length} publications in pubCite4`);
+                      
+                      pubList.forEach((pub: string) => {
                         const parts = parsePublicationCitation(pub);
+                        const venue = parts.journal || 'Unknown Journal/Conference';
+                        const pubType = parts.pubType || determinePublicationType(pub, venue);
+                        
+                        // Debug publication type detection
+                        if (pubType === 'book' || pubType === 'chapter') {
+                          console.log("Found book/chapter in pubCite4:", pubType, pub.substring(0, 80) + "...");
+                        }
                         
                         publications.push({
+<<<<<<< HEAD
                           id: publications.length + idx,
                           title: parts.title || pub.trim()
                           // authors: parts.authors || 'Unknown',
@@ -203,9 +388,119 @@ export default function PublicationsPage() {
                           // keywords: facultyInfo.schoolName1 
                           //   ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean) 
                           //   : ['Computer Science']
+=======
+                          id: pubIdCounter++,
+                          title: parts.title || pub.trim(),
+
+                          authors: processAuthors(parts.authors),
+      
+                          keywords: facultyInfo.schoolName1 
+                            ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean) 
+                            : ['Computer Science']
+>>>>>>> 90624c3016edfa3bdec4bc81d7e8afe71c1e64cf
                         });
                       });
                     }
+                    
+                    // Check for book publications field which might exist in some faculty profiles
+                    if (facultyInfo.bookPublications) {
+                      const bookPubList = splitLines(facultyInfo.bookPublications);
+                      console.log(`Found ${bookPubList.length} publications in bookPublications field`);
+                      
+                      bookPubList.forEach((pub: string) => {
+                        const parts = parsePublicationCitation(pub);
+                        const venue = parts.journal || 'Book Publisher';
+                        
+                        console.log("Processing book publication:", pub.substring(0, 80) + "...");
+                        
+                        publications.push({
+                          id: pubIdCounter++,
+                          title: parts.title || pub.trim(),
+                          authors: processAuthors(parts.authors),
+                          venue: venue,
+                          year: parts.year ? parseInt(parts.year) : 2023,
+                          type: 'book', // Explicitly set as book since it's from the book publications field
+                          doi: parts.doi || '',
+                          citations: Math.floor(Math.random() * 15) + 5, // Books typically have more citations
+                          abstract: 'Abstract not available',
+                          keywords: facultyInfo.schoolName1 
+                            ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean) 
+                            : ['Computer Science']
+                        });
+                      });
+                    }
+                    
+                    // Also check for additional book-related fields that might exist
+                    ["books", "bookChapters", "bookPublished", "publishedBooks", "editedBooks", "technicalReports"].forEach(fieldName => {
+                      if (facultyInfo[fieldName]) {
+                        const bookList = splitLines(facultyInfo[fieldName]);
+                        console.log(`Found ${bookList.length} publications in ${fieldName} field`);
+                        
+                        bookList.forEach((pub: string) => {
+                          const parts = parsePublicationCitation(pub);
+                          const venue = parts.journal || 'Book Publisher';
+                          const isChapter = fieldName === 'bookChapters';
+                          
+                          console.log(`Processing book from ${fieldName}:`, pub.substring(0, 80) + "...");
+                          
+                          publications.push({
+                            id: pubIdCounter++,
+                            title: parts.title || pub.trim(),
+                            authors: processAuthors(parts.authors),
+                            venue: venue,
+                            year: parts.year ? parseInt(parts.year) : 2023,
+                            type: isChapter ? 'chapter' : 'book',
+                            doi: parts.doi || '',
+                            citations: Math.floor(Math.random() * 15) + 5,
+                            abstract: 'Abstract not available',
+                            keywords: facultyInfo.schoolName1 
+                              ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean) 
+                              : ['Computer Science']
+                          });
+                        });
+                      }
+                    });
+                    
+                    // Also check for any other pubCite fields that might contain book data
+                    // Some faculty profiles might have additional publication fields (pubCite1, pubCite2, etc.)
+                    for (const key in facultyInfo) {
+                      if (key.startsWith('pubCite') && key !== 'pubCite3' && key !== 'pubCite4' && facultyInfo[key]) {
+                        const pubList = splitLines(facultyInfo[key]);
+                        console.log(`Found ${pubList.length} publications in ${key} field`);
+                        
+                        pubList.forEach((pub: string) => {
+                          const parts = parsePublicationCitation(pub);
+                          const venue = parts.journal || 'Unknown Venue';
+                          const pubType = parts.pubType || determinePublicationType(pub, venue);
+                          
+                          // Debug publication type detection
+                          if (pubType === 'book' || pubType === 'chapter') {
+                            console.log(`Found book/chapter in ${key}:`, pubType, pub.substring(0, 80) + "...");
+                          }
+                          
+                          publications.push({
+                            id: pubIdCounter++,
+                            title: parts.title || pub.trim(),
+                            authors: processAuthors(parts.authors),
+                            venue: venue,
+                            year: parts.year ? parseInt(parts.year) : 2023,
+                            type: pubType,
+                            doi: parts.doi || '',
+                            citations: Math.floor(Math.random() * 10),
+                            abstract: 'Abstract not available',
+                            keywords: facultyInfo.schoolName1 
+                              ? facultyInfo.schoolName1.split(/[\r\n,]+/).map((i: string) => i.trim()).filter(Boolean) 
+                              : ['Computer Science']
+                          });
+                        });
+                      }
+                    }
+                    
+                    // Report statistics
+                    console.log(`Total publications: ${publications.length}`);
+                    const bookCount = publications.filter(p => p.type === 'book').length;
+                    const chapterCount = publications.filter(p => p.type === 'chapter').length;
+                    console.log(`Found ${bookCount} books and ${chapterCount} book chapters`);
                   }
                 }
               } catch (detailError) {
@@ -267,18 +562,28 @@ export default function PublicationsPage() {
         image: "/placeholder.svg?height=300&width=300",
         publications: [
           {
-            id: 1,
+            id: 101,
             title: "Recent Advances in Image Processing Techniques",
-            authors: "Masilamani V, K. Patel",
+
+            authors: processAuthors("Masilamani V, K. Patel"),
+         
+
           },
           {
-            id: 2,
+            id: 102,
             title: "Biometric Authentication Systems: A Survey",
-            authors: "Masilamani V, S. Kumar",
+
+            authors: processAuthors("Masilamani V, S. Kumar"),
+          },
+          {
+            id: 103,
+            title: "Computer Vision and Image Processing: Fundamentals and Applications",
+            authors: processAuthors("Masilamani V, R. Jain"),
             
+
           }
         ],
-        publicationCount: 2
+        publicationCount: 3
       },
       {
         id: 2,
@@ -288,41 +593,79 @@ export default function PublicationsPage() {
         image: "/placeholder.svg?height=300&width=300",
         publications: [
           {
-            id: 1,
+            id: 201,
             title: "High Performance Computing Architectures for Edge Computing",
-            authors: "Noor Mahammad, R. Singh",
+
+            authors: processAuthors("Noor Mahammad, R. Singh"),
+
           },
           {
-            id: 2,
+            id: 202,
             title: "VLSI Design Optimization for IoT Devices",
-            authors: "Noor Mahammad, P. Reddy",
+
+            authors: processAuthors("Noor Mahammad, P. Reddy"),
+          },
+          {
+            id: 203,
+            title: "Advances in Computer Architecture Design: Chapter 5 - Network-on-Chip Architectures",
+            authors: processAuthors("Noor Mahammad, J. Lee, S. Patel"),
+
           }
         ],
-        publicationCount: 2
+        publicationCount: 3
       }
     ]
   }
 
-  // Extract all years and types for filters
-  const years = Array.from(
-    new Set(facultyData.flatMap((faculty) => faculty.publications.map((pub) => pub.year)))
-  ).sort((a, b) => b - a)
-
-  const publicationTypes = Array.from(
-    new Set(facultyData.flatMap((faculty) => faculty.publications.map((pub) => pub.type)))
-  )
-
   // Get the selected faculty data
   const faculty = selectedFaculty !== null ? facultyData.find((f) => f.id === selectedFaculty) : null
 
-  // Filter publications based on search and filters
+  // Log publication types if faculty is selected
+  useEffect(() => {
+    if (faculty && faculty.publications.length > 0) {
+      // Count publications by type
+      const typeCounts = faculty.publications.reduce((acc, pub) => {
+        acc[pub.type] = (acc[pub.type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log('Publication types for selected faculty:', typeCounts);
+      
+      // Log all book publications for debugging
+      const bookPublications = faculty.publications.filter(pub => pub.type === 'book' || pub.type === 'chapter');
+      console.log(`Found ${bookPublications.length} book/chapter publications`, 
+        bookPublications.map(p => ({ id: p.id, type: p.type, title: p.title.substring(0, 50) })));
+    }
+  }, [faculty]);
+
+  // Filter publications based on search only
   const filteredPublications =
     faculty?.publications.filter((pub) => {
       const matchesSearch =
         searchQuery === "" ||
+<<<<<<< HEAD
         pub.title.toLowerCase().includes(searchQuery.toLowerCase())
+=======
+        pub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+
+        pub.authors.toLowerCase().includes(searchQuery.toLowerCase())
+
+>>>>>>> 90624c3016edfa3bdec4bc81d7e8afe71c1e64cf
       return matchesSearch
     }) || []
+  
+  // Log filtered publication types
+  useEffect(() => {
+    if (filteredPublications.length > 0) {
+      // Count publications by type
+      const typeCounts = filteredPublications.reduce((acc, pub) => {
+        acc[pub.type] = (acc[pub.type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log('Filtered publication types:', typeCounts);
+    }
+  }, [filteredPublications]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredPublications.length / itemsPerPage)
@@ -331,13 +674,11 @@ export default function PublicationsPage() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, yearFilter, typeFilter, selectedFaculty])
+  }, [searchQuery, selectedFaculty])
 
-  // Reset filters
+  // Reset search
   const handleResetFilters = () => {
     setSearchQuery("")
-    setYearFilter(null)
-    setTypeFilter(null)
   }
 
   return (
@@ -405,7 +746,6 @@ export default function PublicationsPage() {
                               className="rounded-full"
                               width={96}
                               height={96}
-                              autoSize={true}
                             />
                           </div>
                           <div>
@@ -467,21 +807,43 @@ export default function PublicationsPage() {
                                 {Math.max(...(faculty?.publications.map((p) => p.year) || [new Date().getFullYear()]))} }
                               </span> */}
                             </div>
+                            
+                            <div className="mt-4">
+                              <button
+                                onClick={() => {
+                                  const area = faculty?.area?.toLowerCase() || '';
+                                  const searchParam = encodeURIComponent(area);
+                                  // Navigate to faculty page with area filter and smooth scroll to the faculty section
+                                  window.location.href = `/people/faculty?area=${searchParam}#faculty-members`;
+                                }}
+                                className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 mr-1"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                                  />
+                                </svg>
+                                View Faculty in this Area
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </Suspense>
 
-                    {/* Search and Filters */}
+                    {/* Search */}
                     <Suspense fallback={<div className="h-24 bg-gray-100 rounded-xl animate-pulse mb-6"></div>}>
                       <PublicationFilters
-                        years={years}
-                        types={publicationTypes}
-                        selectedYear={yearFilter}
-                        selectedType={typeFilter}
                         searchQuery={searchQuery}
-                        onYearChange={setYearFilter}
-                        onTypeChange={setTypeFilter}
                         onSearchChange={setSearchQuery}
                         onResetFilters={handleResetFilters}
                       />

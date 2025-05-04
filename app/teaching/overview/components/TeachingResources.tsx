@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -49,7 +49,12 @@ export default function TeachingResources() {
   const [filter, setFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [isMounted, setIsMounted] = useState(false)
   const itemsPerPage = 6
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Filter resources based on category and search term
   const filteredResources = resources.filter((resource) => {
@@ -68,6 +73,32 @@ export default function TeachingResources() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber)
+  }
+
+  // Simplified version for SSR
+  if (!isMounted) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-[#003366]">Teaching Resources</h2>
+            <div className="w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              We provide a variety of resources to support the learning journey of our students. These resources are
+              designed to enhance the classroom experience and facilitate self-directed learning.
+            </p>
+          </div>
+          <div className="max-w-5xl mx-auto mb-8">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 h-12"></div>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-64 bg-white rounded-lg shadow-sm border border-gray-100"></div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (

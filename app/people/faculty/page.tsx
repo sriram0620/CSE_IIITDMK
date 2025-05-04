@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, User, BookOpen } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -22,7 +23,7 @@ import FacultyHero from "@/components/faculty/FacultyHero"
 import ResearchAreas from "@/components/faculty/ResearchAreas"
 import { Faculty } from "@/components/faculty/FacultyData"
 
-import { facultyData, fetchFacultyData } from "@/components/faculty/FacultyData"
+import { facultyData, fetchFacultyData, researchAreas } from "@/components/faculty/FacultyData"
 
 // Interface for the faculty detail API response
 interface FacultyDetailResponse {
@@ -85,10 +86,44 @@ export default function FacultyPage() {
   const [hoveredFaculty, setHoveredFaculty] = useState<number | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  
+  // Get search params
+  const searchParams = useSearchParams()
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 9
+
+  // Handle smooth scrolling to section when hash is present in URL
+  useEffect(() => {
+    // Check if we have a hash fragment in the URL
+    if (window.location.hash === '#faculty-members' || window.location.hash === '#research-areas') {
+      // Allow some time for the page to render before scrolling
+      setTimeout(() => {
+        const sectionId = window.location.hash.substring(1); // Remove the # character
+        const section = document.getElementById(sectionId);
+        
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // If coming to faculty members, also scroll to the cards/list after a short delay
+          if (sectionId === 'faculty-members') {
+            setTimeout(() => {
+              // Determine which view is active and scroll to that container
+              const facultyCardsSection = document.getElementById('faculty-cards');
+              const facultyListSection = document.getElementById('faculty-list');
+              
+              if (activeTab === 'grid' && facultyCardsSection) {
+                facultyCardsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              } else if (activeTab === 'list' && facultyListSection) {
+                facultyListSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 300); // Short delay after scrolling to the section
+          }
+        }
+      }, 500);
+    }
+  }, [activeTab]);
 
   // Data load
   useEffect(() => {
@@ -96,13 +131,31 @@ export default function FacultyPage() {
       try {
         await fetchFacultyData()
         setLoading(false)
+        
+        // Check if area query parameter exists and set filter
+        const areaParam = searchParams.get('area')
+        if (areaParam) {
+          // Find the matching research area or use 'all' if not found
+          const normalizedAreaParam = decodeURIComponent(areaParam).toLowerCase()
+          const matchedArea = researchAreas.find((area: { value: string; name: string }) => 
+            area.value.toLowerCase().includes(normalizedAreaParam) || 
+            normalizedAreaParam.includes(area.value.toLowerCase())
+          )
+          
+          if (matchedArea) {
+            setSelectedResearchArea(matchedArea.value)
+          } else {
+            // If no direct match, set search query to the area for text search
+            setSearchQuery(decodeURIComponent(areaParam))
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load faculty data")
         setLoading(false)
       }
     }
     loadData()
-  }, [])
+  }, [searchParams])
 
   // Function to handle faculty selection and fetch additional details
   const handleFacultySelect = async (faculty: any) => {
@@ -365,9 +418,19 @@ export default function FacultyPage() {
           <FacultyStats stats={stats} />
         </Suspense>
 
-        {/* Filters + Grid/List */}
-        <section className="py-16">
+        {/* Faculty Members Section */}
+        <section className="py-10 bg-white">
           <div className="container mx-auto px-4 max-w-7xl">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-bold text-blue-900 mb-3 flex items-center justify-center">
+                <User className="w-7 h-7 mr-2 text-blue-600" />
+                Faculty Members
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Our faculty brings together diverse expertise across multiple specializations in computer science and engineering.
+              </p>
+            </div>
+            
             <FacultyFilters
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -379,14 +442,13 @@ export default function FacultyPage() {
             />
 
             {/* Header with count and toggle */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-blue-900 flex items-center">
-                <User className="w-6 h-6 mr-2 text-blue-600" />
-                Faculty Members
+            <div className="flex justify-between items-center mb-6" id="faculty-members">
+              <h3 className="text-xl font-medium text-gray-700 flex items-center">
+                Found Results
                 <span className="ml-3 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                   {filteredFaculty.length} members
                 </span>
-              </h2>
+              </h3>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
                   <TabsTrigger value="grid">Grid View</TabsTrigger>
@@ -400,7 +462,7 @@ export default function FacultyPage() {
               {activeTab === "grid" ? (
                 <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {currentFaculty.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="faculty-cards">
                       {currentFaculty.map((faculty) => (
                         <Suspense key={faculty.id} fallback={
                           <Card className="h-full animate-pulse">
@@ -451,7 +513,7 @@ export default function FacultyPage() {
               ) : (
                 <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {currentFaculty.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4" id="faculty-list">
                       {currentFaculty.map((faculty) => (
                         <Suspense key={faculty.id} fallback={
                           <Card className="w-full h-24 animate-pulse flex items-center p-4">
@@ -488,24 +550,63 @@ export default function FacultyPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+            
+            <div className="mt-12 text-center">
+              <Button 
+                variant="outline" 
+                className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50"
+                onClick={() => {
+                  const researchSection = document.getElementById('research-areas');
+                  if (researchSection) {
+                    researchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                Explore Research Areas
+                <BookOpen className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </section>
 
-            {/* Research Areas Section */}
-            <div className="mt-16">
-              <h2 className="text-2xl font-bold text-blue-900 mb-6 flex items-center">
-                <BookOpen className="w-6 h-6 mr-2 text-blue-600" />
+        {/* Research Areas Section */}
+        <section className="py-16 bg-gray-50" id="research-areas">
+          <div className="container mx-auto px-4 max-w-7xl">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-bold text-blue-900 mb-3 flex items-center justify-center">
+                <BookOpen className="w-7 h-7 mr-2 text-blue-600" />
                 Research Areas
               </h2>
-              <Suspense fallback={<LoadingFallback />}>
-                <ResearchAreas
-                  facultyData={facultyData}
-                  selectedResearchArea={selectedResearchArea}
-                  setSelectedResearchArea={setSelectedResearchArea}
-                  setSelectedPosition={setSelectedPosition}
-                  setSearchQuery={setSearchQuery}
-                  contentInView={true} // Force true to ensure animation
-                  getRandomGradient={getRandomGradient}
-                />
-              </Suspense>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Explore our diverse areas of research and find faculty members specializing in each field.
+              </p>
+            </div>
+            <Suspense fallback={<LoadingFallback />}>
+              <ResearchAreas
+                facultyData={facultyData}
+                selectedResearchArea={selectedResearchArea}
+                setSelectedResearchArea={setSelectedResearchArea}
+                setSelectedPosition={setSelectedPosition}
+                setSearchQuery={setSearchQuery}
+                contentInView={true} // Force true to ensure animation
+                getRandomGradient={getRandomGradient}
+              />
+            </Suspense>
+            
+            <div className="mt-12 text-center">
+              <Button 
+                variant="outline" 
+                className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50"
+                onClick={() => {
+                  const facultySection = document.getElementById('faculty-members');
+                  if (facultySection) {
+                    facultySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                View Faculty Members
+                <User className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </section>

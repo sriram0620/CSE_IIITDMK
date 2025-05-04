@@ -85,6 +85,28 @@ const ResearchAreas: React.FC<ResearchAreasProps> = ({
                         setSelectedResearchArea(area.value)
                         setSelectedPosition("all")
                         setSearchQuery("")
+                        
+                        // Scroll to the faculty members section
+                        setTimeout(() => {
+                          const facultyMembersSection = document.getElementById('faculty-members')
+                          if (facultyMembersSection) {
+                            facultyMembersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            
+                            // After a short delay, scroll to show the faculty cards or list
+                            setTimeout(() => {
+                              // Check if grid or list view is active
+                              const facultyCardsSection = document.getElementById('faculty-cards')
+                              const facultyListSection = document.getElementById('faculty-list')
+                              
+                              // Try to scroll to either the cards or list view
+                              if (facultyCardsSection && facultyCardsSection.offsetHeight > 0) {
+                                facultyCardsSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                              } else if (facultyListSection && facultyListSection.offsetHeight > 0) {
+                                facultyListSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                              }
+                            }, 300)
+                          }
+                        }, 100) // Small delay to allow state updates to process
                       }}
                     >
                       View Faculty in this Area

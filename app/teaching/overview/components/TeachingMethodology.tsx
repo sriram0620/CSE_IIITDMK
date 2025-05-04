@@ -1,12 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PresentationIcon, BookOpenCheck, Microscope, Users, Lightbulb, GraduationCap, ArrowRight } from "lucide-react"
+import Image from "next/image"
 
 export default function TeachingMethodology() {
   const [activeTab, setActiveTab] = useState("lectures")
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const methodologies = [
     {
@@ -22,7 +28,7 @@ export default function TeachingMethodology() {
         "Guest lectures from industry experts",
         "Recorded sessions for revision",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/image_6.jpeg",
     },
     {
       id: "labs",
@@ -37,7 +43,7 @@ export default function TeachingMethodology() {
         "Open lab hours for independent exploration",
         "Regular lab assessments",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/image_8.png",
     },
     {
       id: "projects",
@@ -52,7 +58,7 @@ export default function TeachingMethodology() {
         "Regular mentorship and guidance",
         "Public showcases and demonstrations",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/image_5 (1).png",
     },
     {
       id: "seminars",
@@ -67,7 +73,7 @@ export default function TeachingMethodology() {
         "Certificate programs",
         "Student-led seminars",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/a1.jpg",
     },
     {
       id: "research",
@@ -82,7 +88,7 @@ export default function TeachingMethodology() {
         "Research seminars and journal clubs",
         "Conference participation",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/image_11 (2).jpg",
     },
     {
       id: "mentoring",
@@ -97,9 +103,44 @@ export default function TeachingMethodology() {
         "Academic advising",
         "Alumni mentorship connections",
       ],
-      image: "/placeholder.svg?height=300&width=500",
+      image: "/assets/a7.jpg",
     },
   ]
+
+  // If not mounted yet, show a simplified version without interactive elements
+  if (!isMounted) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-[#003366]">Our Teaching Methodology</h2>
+            <div className="w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              We employ a variety of teaching methodologies to ensure that our students receive a well-rounded education
+              that prepares them for the challenges of the rapidly evolving field of computer science.
+            </p>
+          </div>
+          
+          {/* Loading placeholder */}
+          <div className="w-full max-w-5xl mx-auto">
+            <div className="h-12 bg-blue-50 rounded-lg mb-8"></div>
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-20 bg-gray-100 rounded mb-6"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-5 bg-gray-100 rounded w-full"></div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg overflow-hidden shadow-lg relative h-[300px] bg-gray-200"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-white">
@@ -170,12 +211,14 @@ export default function TeachingMethodology() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="rounded-lg overflow-hidden shadow-lg"
+                    className="rounded-lg overflow-hidden shadow-lg relative h-[300px]"
                   >
-                    <img
-                      src={method.image || "/placeholder.svg"}
+                    <Image
+                      src={method.image}
                       alt={method.title}
-                      className="w-full h-auto object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 500px"
+                      style={{ objectFit: "cover" }}
                     />
                   </motion.div>
                 </motion.div>
