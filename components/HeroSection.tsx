@@ -25,8 +25,8 @@ export default function HeroSection() {
       color: "from-cyan-600 to-blue-700",
       accent: "bg-cyan-500",
       stats: [
-        { value: "35+", label: "Startups" },
-        { value: "12", label: "Industry Labs" },
+        { value: "5+", label: "Startups" },
+        { value: "5+", label: "Industry Labs" },
         { value: "40+", label: "Consultancy Projects" },
       ],
     },
@@ -41,9 +41,9 @@ export default function HeroSection() {
       color: "from-blue-600 to-indigo-700",
       accent: "bg-blue-500",
       stats: [
-        { value: "94%", label: "Placement Rate" },
-        { value: "120+", label: "Industry Partners" },
-        { value: "24", label: "Research Labs" },
+        { value: "80%", label: "Placement Rate" },
+        { value: "90+", label: "Industry Partners" },
+        { value: "5+", label: "Research Labs" },
       ],
     },
     {
@@ -58,8 +58,8 @@ export default function HeroSection() {
       accent: "bg-purple-500",
       stats: [
         { value: "200+", label: "Publications" },
-        { value: "₹42Cr", label: "Research Grants" },
-        { value: "18", label: "Patents Filed" },
+        { value: "₹15Cr+", label: "Research Grants" },
+        { value: "10+", label: "Patents Filed" },
       ],
     },
   ]
