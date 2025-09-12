@@ -411,7 +411,177 @@ const extractedLectureNotes: LectureNote[] = [
     url: "http://iiitdm.ac.in/old/Faculty_Teaching/Umarani/doc/hci_Video/Free%20Speech%20Recognition%20Tutorial%201%20-%20Setting%20Up%20Windows%20Speech%20Recognition%20W7%208%20Vista%20WSR.mp4",
     tags: ["HCI", "Speech Recognition", "Video", "Elective"],
     category: "video"
-  }
+  },
+
+//Dr Sadagopan
+   {
+    id: 309,
+    title: "Turing Machines and Input Representation",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/scribe-TM-intro.pdf",
+    tags: ["ADSA", "Turing Machines and Input Representation", "Core Course"],
+    category: "lecture"
+  },
+
+  {
+    id: 310,
+    title: "Average Case Analysis",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/average-analysis.pdf",
+    tags: ["DAA", "Average Case Analysis", "Core Course"],
+    category: "lecture"
+  },
+
+    {
+    id: 311,
+    title: "Order Statistics",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/order-statistics.pdf",
+    tags: ["DAA", "Order Statistics", "Core Course"],
+    category: "lecture"
+  },
+
+    {
+    id: 312,
+    title: "M in-Max Heap and Deap",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/min_max%20_heap.pdf",
+    tags: ["DAA", "M in-Max Heap and Deap", "Core Course"],
+    category: "lecture"
+  },
+
+     {
+    id: 313,
+    title: "Binomial Heap",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/binomialheap.pdf",
+    tags: ["DAA", "Binomial Heap", "Core Course"],
+    category: "lecture"
+  },
+
+    {
+    id: 314,
+    title: "Amortized Analysis",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/amortized-analysis.pdf",
+    tags: ["DAA", "Amortized Analysis", "Core Course"],
+    category: "lecture"
+  },
+
+     {
+    id: 315,
+    title: "Amortized Analysis - Dynamic Tables",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/amortized-analysis-part-2.pdf",
+    tags: ["DAA", "Amortized Analysis - Dynamic Tables", "Core Course"],
+    category: "lecture"
+  },
+
+    {
+    id: 316,
+    title: "Fibonacci Heap",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/fibonnaciHeap.pdf",
+    tags: ["DAA", "Fibonacci Heap", "Core Course"],
+    category: "lecture"
+  },
+
+  
+    {
+    id: 317,
+    title: " Greedy Algorithms",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/greedy-part-2.pdf",
+    tags: ["DAA", "Greedy Algorithms", "Core Course"],
+    category: "lecture"
+  },
+
+  {
+    id: 318,
+    title: "More on NP and Reductions",
+    course: "Advanced Data Structures and Algorithms",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/ADSA/new/np-take-2.pdf",
+    tags: ["DAA", "More on NP and Reductions", "Core Course"],
+    category: "lecture"
+  },
+
+  /*
+  //Dr. Sadagopan - C Programmaing
+  {
+    id: 319,
+    title: "Introduction, Evolution and Base Conversion",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/introduction-base-conversion.pdf",
+    tags: ["C Programming", "Introduction, Evolution and Base Conversion", "Core Course"],
+    category: "lecture"
+  },
+
+    {
+    id: 320,
+    title: "Sequence Statements - Input, Output, Formatted I/O",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/1.declaration-in-out-escape-sequence.c",
+    tags: ["C Programming", "Sequence Statements - Input, Output, Formatted I/O", "Core Course"],
+    category: "lecture"
+  },
+
+   {
+    id: 321,
+    title: "Selection Statements - IF-ELSE",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/2.if-else.c",
+    tags: ["C Programming", "Selection Statements - IF-ELSE"],
+    category: "lecture"
+  },
+
+   {
+    id: 322,
+    title: "Selection Statements - Nested-IF-ELSE, Switch-Case",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/3.nested-if-switch-case.c",
+    tags: ["C Programming", "Selection Statements - Nested-IF-ELSE, Switch-Case"],
+    category: "lecture"
+  },
+
+   {
+    id: 323,
+    title: "Selection Statements - Nested-IF-ELSE, Switch-Case",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/3.nested-if-switch-case.c",
+    tags: ["C Programming", "Selection Statements - Nested-IF-ELSE, Switch-Case"],
+    category: "lecture"
+  },
+*/
 ];
 
 // Combine with original sample data
