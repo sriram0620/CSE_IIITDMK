@@ -525,7 +525,7 @@ const extractedLectureNotes: LectureNote[] = [
     category: "lecture"
   },
 
-  /*
+  
   //Dr. Sadagopan - C Programmaing
   {
     id: 319,
@@ -573,15 +573,157 @@ const extractedLectureNotes: LectureNote[] = [
 
    {
     id: 323,
-    title: "Selection Statements - Nested-IF-ELSE, Switch-Case",
+    title: "Repetition Statements - For, While loops and Goto",
     course: "C Programming",
     instructor: "Dr. N Sadagopan",
     fileType: "PDF",
-    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/3.nested-if-switch-case.c",
-    tags: ["C Programming", "Selection Statements - Nested-IF-ELSE, Switch-Case"],
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/4.for-while-loop-label-goto.c",
+    tags: ["C Programming", "Repetition Statements - For, While loops and Goto"],
     category: "lecture"
   },
-*/
+  {
+    id: 324,
+    title: "Characters and Strings",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/5.characters-strings.c",
+    tags: ["C Programming", "Characters and Strings"],
+    category: "lecture"
+  },
+
+   {
+    id: 325,
+    title: "Logical Thinking - Swapping Two Numbers",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/6.swap-two-numbers.c",
+    tags: ["C Programming", "Logical Thinking - Swapping Two Numbers"],
+    category: "lecture"
+  },
+
+    {
+    id: 326,
+    title: "Logical Thinking - Printing integer digit wise",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/7.print-integer-digit-wise.c",
+    tags: ["C Programming", "Logical Thinking - Printing integer digit wise"],
+    category: "lecture"
+  },
+
+     {
+    id: 327,
+    title: "Logical Thinking - Divisibility Check by 3 and 4",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/8.divisibility-by-3-4.c",
+    tags: ["C Programming", "Logical Thinking - Divisibility Check by 3 and 4"],
+    category: "lecture"
+  },
+
+  
+     {
+    id: 328,
+    title: "Modular Programming - Functions",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/9.functions.c",
+    tags: ["C Programming", "Modular Programming - Functions"],
+    category: "lecture"
+  },
+
+  //{
+    //id: 329,
+    //title: "Modular Programming - Functions",
+    //course: "C Programming",
+    //instructor: "Dr. N Sadagopan",
+    //fileType: "PDF",
+    //url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/9.functions.c",
+    //tags: ["C Programming", "Modular Programming - Functions"],
+    //category: "lecture"
+  //},
+
+   {
+    id: 330,
+    title: "Pointers, Finding Factorial, Printing Fibonacci",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/10.functions-pointers-fact-fibonacci.c",
+    tags: ["C Programming", "Pointers, Finding Factorial, Printing Fibonacci"],
+    category: "lecture"
+  },
+
+  {
+    id: 331,
+    title: "Two Dimensional Arrays and Structure",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/11.two-d-arrays-structure.c",
+    tags: ["C Programming", "Two Dimensional Arrays and Structure"],
+    category: "lecture"
+  },
+
+    {
+    id: 332,
+    title: "Find Min among five numbers",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/12.find-min.c",
+    tags: ["C Programming", "Find Min among five numbers"],
+    category: "lecture"
+  },
+
+    {
+    id: 333,
+    title: "Sorting",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/13.sorting.c",
+    tags: ["C Programming", "Sorting"],
+    category: "lecture"
+  },
+
+   {
+    id: 334,
+    title: "Primality Testing",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/14.primality-testing.c",
+    tags: ["C Programming", "Primality Testing"],
+    category: "lecture"
+  },
+
+    {
+    id: 335,
+    title: "Recursion (Addition and Mulitiplication)",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/15.recursion-addition-multiplication.c",
+    tags: ["C Programming", "Recursion (Addition and Mulitiplication)"],
+    category: "lecture"
+  },
+ {
+    id: 336,
+    title: "Ladder Digit Printing",
+    course: "C Programming",
+    instructor: "Dr. N Sadagopan",
+    fileType: "PDF",
+    url: "/doc/Faculty_Teaching/Sadagopan/pdf/C/16.ladder-digit-printing.c",
+    tags: ["C Programming", "Ladder Digit Printing"],
+    category: "lecture"
+  },
+
 ];
 
 // Combine with original sample data
